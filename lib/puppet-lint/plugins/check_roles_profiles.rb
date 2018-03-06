@@ -46,3 +46,18 @@ PuppetLint.new_check(:roles_include_profiles) do
     end
   end
 end
+
+PuppetLint.new_check(:roles_inherits_roles) do
+  def check
+    class_indexes.select { |c| c[:name_token].value =~ /^roles?(::|$)/ }.each do |c|
+      if c[:inherited_token] and ! (c[:inherited_token].value =~ /^(::)?roles?(::|$)/)
+        notify :warning, {
+          :message => "Roles must only inherit other roles",
+          :line => c[:inherited_token].line,
+          :column => c[:inherited_token].column
+        }
+      end
+    end
+  end
+end
+ 
