@@ -60,4 +60,27 @@ PuppetLint.new_check(:roles_inherits_roles) do
     end
   end
 end
- 
+
+PuppetLint.new_check(:nodes_include_one_role) do
+  def check
+    node_indexes.each do |n|
+      tokens = n[:tokens].select { |t|
+        ![ :NEWLINE, :WHITESPACE, :INDENT, :COMMENT, :MLCOMMENT, :SLASH_COMMENT].include?(t.type)
+      }
+      ibs = tokens.find_index { |t| t.type == :LBRACE }
+      # as we have filtered out all whitespace and only allow one role include per node def
+      # the only option for the token serie is: [ '{', 'include', 'role', '}' ] and everything
+      # else is an error
+      unless (tokens[ibs].type == :LBRACE and
+        tokens[ibs+1].value == 'include' and
+        tokens[ibs+2].type == :NAME and tokens[ibs+2].value =~ /^(::)?roles?(::|$)/ and
+        tokens[ibs+3].type == :RBRACE)
+          notify :warning, {
+            :message => "Nodes must only include roles",
+            :line => tokens[ibs+1].line,
+            :column => tokens[ibs+1].column,
+          }
+      end
+    end
+  end
+end
