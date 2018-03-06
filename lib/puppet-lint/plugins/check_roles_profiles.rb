@@ -13,3 +13,36 @@ PuppetLint.new_check(:roles_with_params) do
     end
   end
 end
+
+PuppetLint.new_check(:roles_include_profiles) do
+  def check
+    class_indexes.select { |c| c[:name_token].value =~ /^roles?(::|$)/ }.each do |c|
+      # As only `include profile` is allowed any resource is bad
+      resource_indexes.select { |r| r[:start] >= c[:start] and r[:end] <= c[:end] }.each do |r|
+        notify :warning, {
+          :message => "Roles must only `include profiles`",
+          :line => r[:type].line,
+          :column => r[:type].column,
+        }
+      end
+      # each include must be followed with a profile
+      tokens[c[:start]..c[:end]].select { |t| t.value == 'include' }.each do |t|
+        unless t.next_code_token.value =~ /^(::)?profiles?(::|$)/
+          notify :warning, {
+            :message => "Roles must only `include profiles`",
+            :line => t.line,
+            :column => t.column
+          }
+        end
+      end
+      # Conditional logic should be avoided
+      tokens[c[:start]..c[:end]].select { |t| [ :IF, :ELSE, :ELSIF, :UNLESS, :CASE].include?(t.type) }.each do |t|
+        notify :warning, {
+          :message => "Roles must only `include profiles`",
+          :line => t.line,
+          :column => t.column
+        }
+      end
+    end
+  end
+end
