@@ -58,6 +58,20 @@ Will raise a warning when a role has class parameters
 Warning: roles must not have any parameters
 ```
 
+### roles_inherits_roles
+
+**--fix-support: No**
+
+Will raise a warning when a role inherits something other than a role
+
+### nodes_include_one_role
+
+**--fix-support: No**
+
+Will raise a warning when a node definition contains more than one role
+`include` (except comments).
+
 ## References
 
 [1] https://puppet.com/docs/pe/2017.2/r_n_p_full_example.html
+

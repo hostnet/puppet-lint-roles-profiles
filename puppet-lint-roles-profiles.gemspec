@@ -15,9 +15,9 @@ Gem::Specification.new do |spec|
   spec.summary     = 'puppet-lint check to validate that the codebase adheres to the roles and profiles workflow'
   spec.description = <<-EOF
     This puppet-lint extension validates that:
-    - node definitions only `include` roles
+    - node definitions only `include` a single role
     - roles only `include` profiles and have no class parameters
-    - profiles don't build on top of roles
+    - roles only `inherit` other roles
   EOF
 
   spec.add_dependency             'puppet-lint', '>= 1.1', '< 3.0'
